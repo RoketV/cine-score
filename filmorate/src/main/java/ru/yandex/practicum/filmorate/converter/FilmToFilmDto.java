@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.converter;
+package ru.yandex.practicum.filmorate.mapper;
 
 
 import org.springframework.core.convert.converter.Converter;

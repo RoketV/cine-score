@@ -27,14 +27,14 @@ public class FilmValidationTest {
     @Test
     @DisplayName("asserts that the name cannot be null")
     void nullNameFailTest() {
-        FilmDto filmDto = new FilmDto(1,null, "description", LocalDate.now(), 120);
+        FilmDto filmDto = new FilmDto(null, "description", LocalDate.now(), 120);
         Assertions.assertTrue(Validator.hasErrorMessage(filmDto, "name cannot be empty or blank"));
     }
 
     @Test
     @DisplayName("not empty name test")
     void notEmptyNameTest() {
-        FilmDto filmDto = new FilmDto(1,"name", "description", LocalDate.now(), 120);
+        FilmDto filmDto = new FilmDto("name", "description", LocalDate.now(), 120);
         Assertions.assertFalse(Validator.hasErrorMessage(filmDto, "name cannot be empty or blank"));
     }
 
@@ -42,7 +42,7 @@ public class FilmValidationTest {
     @DisplayName("asserts that the name cannot be blank")
     @ValueSource(strings = {" ", "  ", "   ", "    "})
     void blankNameTest(String name) {
-        FilmDto filmDto = new FilmDto(1,name, "description", LocalDate.now(), 120);
+        FilmDto filmDto = new FilmDto(name, "description", LocalDate.now(), 120);
         Assertions.assertTrue(Validator.hasErrorMessage(filmDto, "name cannot be empty or blank"));
     }
 
@@ -50,7 +50,7 @@ public class FilmValidationTest {
     @DisplayName("asserts that description cannot be more then 200 chars")
     @ValueSource(ints = {201, 250} )
     void hugeDescriptionTest(int size) {
-        FilmDto filmDto = new FilmDto(1,"name", buildString(size), LocalDate.now(), 120);
+        FilmDto filmDto = new FilmDto("name", buildString(size), LocalDate.now(), 120);
         Assertions.assertTrue(Validator.hasErrorMessage(filmDto, "size cannot be more then 200 char"));
     }
 
@@ -58,28 +58,28 @@ public class FilmValidationTest {
     @DisplayName("huge description test")
     @ValueSource(ints = {200, 150} )
     void blankNameTest(int size) {
-        FilmDto filmDto = new FilmDto(1,"name", buildString(size), LocalDate.now(), 120);
+        FilmDto filmDto = new FilmDto("name", buildString(size), LocalDate.now(), 120);
         Assertions.assertFalse(Validator.hasErrorMessage(filmDto, "size cannot be more then 200 char"));
     }
 
     @Test
     @DisplayName("checks negative duration")
     void negativeDurationTest() {
-        FilmDto filmDto = new FilmDto(1,"name", "description", LocalDate.now(), -120);
+        FilmDto filmDto = new FilmDto("name", "description", LocalDate.now(), -120);
         Assertions.assertTrue(Validator.hasErrorMessage(filmDto, "duration cannot be negative number"));
     }
 
     @Test
     @DisplayName("checks positive duration")
     void positiveDurationTest() {
-        FilmDto filmDto = new FilmDto(1,"name", "description", LocalDate.now(), 120);
+        FilmDto filmDto = new FilmDto("name", "description", LocalDate.now(), 120);
         Assertions.assertFalse(Validator.hasErrorMessage(filmDto, "duration cannot be negative number"));
     }
 
     @Test
     @DisplayName("checks localDate before first film")
     void beforeFirstFilmLocalDateTest() {
-        FilmDto filmDto = new FilmDto(1,"name", "description",
+        FilmDto filmDto = new FilmDto("name", "description",
                 LocalDate.parse(FIRST_FILM_DATE).minusDays(1), 120);
         Assertions.assertTrue(Validator.hasErrorMessage(filmDto, "film cannot be made before 1895-12-28"));
     }
@@ -87,7 +87,7 @@ public class FilmValidationTest {
     @Test
     @DisplayName("checks localDate at the time of the first film")
     void atTheTimeOfFirstFilmLocalDateTest() {
-        FilmDto filmDto = new FilmDto(1,"name", "description",
+        FilmDto filmDto = new FilmDto("name", "description",
                 LocalDate.parse(FIRST_FILM_DATE), 120);
         Assertions.assertTrue(Validator.hasErrorMessage(filmDto, "film cannot be made before 1895-12-28"));
     }
@@ -95,7 +95,7 @@ public class FilmValidationTest {
     @Test
     @DisplayName("checks localDate after first film")
     void afterFirstFilmLocalDateTest() {
-        FilmDto filmDto = new FilmDto(1,"name", "description",
+        FilmDto filmDto = new FilmDto("name", "description",
                 LocalDate.parse(FIRST_FILM_DATE).plusDays(1), 120);
         Assertions.assertFalse(Validator.hasErrorMessage(filmDto, "film cannot be made before 1895-12-28"));
     }

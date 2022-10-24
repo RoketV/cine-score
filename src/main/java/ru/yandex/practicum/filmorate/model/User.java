@@ -3,9 +3,12 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 
 
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -13,17 +16,18 @@ import java.time.LocalDate;
 public class User {
 
     public User() {
-        idCounter++;
-        id = idCounter;
+        friends = new HashSet<>();
+        likedFilms = new HashSet<>();           // правильно ли это инициализировать через конструктор?
     }
 
-
-    private static long idCounter = 0;
     @Id
     private long id;
     private String email;
     private String login;
     private String name;
     private LocalDate birthday;
-
+    @ElementCollection
+    private Set<Long> friends;
+    @ElementCollection
+    private Set<Long> likedFilms;
 }

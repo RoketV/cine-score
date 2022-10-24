@@ -8,6 +8,14 @@ import java.time.LocalDate;
 
 @Data
 public class FilmDto {
+    public FilmDto() {}
+
+    public FilmDto(String name, String description, LocalDate releaseDate, int duration) {
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+    }
 
     private long id;
     @NotBlank(message = "name cannot be empty or blank")
@@ -18,16 +26,6 @@ public class FilmDto {
     private LocalDate releaseDate;
     @Min(value = 0, message = "duration cannot be negative number")
     private int duration;
+    private long rate;
 
-    public FilmDto(long id, String name, String description, LocalDate releaseDate, int duration) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-    }
-
-    public FilmDto(){
-
-    }
 }

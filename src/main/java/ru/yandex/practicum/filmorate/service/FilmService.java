@@ -1,56 +1,73 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.converter.FilmDtoToFilm;
-import ru.yandex.practicum.filmorate.dto.FilmDto;
-import ru.yandex.practicum.filmorate.exceptions.NoSuchEntityException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.HashMap;
-import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NoSuchEntityException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
-    private final Map<Long, Film> films = new HashMap<>();
 
-    public Map<Long, Film> getFilms() {
-        return films;
+    private final InMemoryFilmStorage inMemoryFilmStorage;
+    private final InMemoryUserStorage inMemoryUserStorage;
+
+    public List<Film> getPopularFilms(int limit) {
+        List<Film> films = new ArrayList<>(inMemoryFilmStorage.getFilms().values());
+        return films.stream()
+                .sorted(Comparator.comparing(Film::getRate).reversed())
+                .limit(limit)
+                .collect(Collectors.toList());
+
     }
 
-    public Film postFilm(FilmDto dto) {
-        Converter<FilmDto, Film> converter = new FilmDtoToFilm();
-        Film film = converter.convert(dto);
-        if (film == null) {
-            log.warn("trying to make null entity");
-            throw new ValidationException("entity cannot be null");
-        }
-        films.put(film.getId(), film);
-        log.info("film posted");
-        return film;
-    }
-
-    public Film updateFilm(FilmDto dto) {
-        FilmDtoToFilm converter = new FilmDtoToFilm();
-        Film film = converter.convert(dto);
-        if (film == null) {
-            log.warn("trying to make null entity");
-            throw new ValidationException("entity cannot be null");
-        }
-        if (films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
-            log.info("film updated");
-        } else {
-            log.warn("cannot update non-existing entity");
+    public ResponseEntity<String> addLike(long filmId, long userId) {
+        if (entitiesDontExist(filmId, userId)) {
+            log.info("trying to extract non existing entity in addLike method");
             throw new NoSuchEntityException();
         }
-        return film;
+        User user = inMemoryUserStorage.getUsers().get(userId);
+        Film film = inMemoryFilmStorage.getFilm(filmId);
+        if (user.getLikedFilms().contains(filmId)) {
+            return new ResponseEntity<>(String.format("user %s liked %s film before", user.getName(), film.getName())
+                    , HttpStatus.ALREADY_REPORTED);
+        }
+        film.setRate(film.getRate() + 1);
+        user.getLikedFilms().add(filmId);
+        return new ResponseEntity<>("like added", HttpStatus.OK);
     }
 
-    public void deleteFilm(Film film) {
-        films.remove(film.getId());
+    public ResponseEntity<String> deleteLike(long filmId, long userId) {
+        if (entitiesDontExist(filmId, userId)) {
+            log.info("trying to extract non existing entity in addLike method");
+            throw new NoSuchEntityException();
+        }
+        User user = inMemoryUserStorage.getUsers().get(userId);
+        Film film = inMemoryFilmStorage.getFilm(filmId);
+        if (!user.getLikedFilms().contains(filmId)) {
+            return new ResponseEntity<>(String.format("user %s never liked %s film before", user.getName(), film.getName())
+                    , HttpStatus.NOT_FOUND);
+        }
+        film.setRate(film.getRate() - 1);
+        user.getLikedFilms().remove(filmId);
+        return new ResponseEntity<>("like removed", HttpStatus.OK);
+    }
+
+    private boolean entitiesDontExist(long filmId, long userId) {
+        return (!inMemoryFilmStorage.getFilms().containsKey(filmId))
+                || (!inMemoryUserStorage.getUsers().containsKey(userId));
     }
 }
