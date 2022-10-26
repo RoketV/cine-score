@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.fabrics;
+package ru.yandex.practicum.filmorate.factories;
 
 
 import org.springframework.stereotype.Component;
@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 
 @Component
-public class UserFabric {
+public class UserFactory {
 
     private static int id = 0;
 

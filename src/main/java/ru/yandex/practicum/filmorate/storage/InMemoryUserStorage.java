@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.UserDto;
-import ru.yandex.practicum.filmorate.fabrics.UserFabric;
+import ru.yandex.practicum.filmorate.factories.UserFactory;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.exceptions.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -32,7 +32,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (dto.getLogin() == null || dto.getLogin().isBlank()) {
             dto.setLogin(dto.getName());
         }
-        User user = UserFabric.createUser(dto);
+        User user = UserFactory.createUser(dto);
             users.put(user.getId(), user);
             log.info("film posted");
             return user;

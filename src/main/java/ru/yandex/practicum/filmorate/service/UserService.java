@@ -5,10 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exceptions.NoSuchEntityException;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
+
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -16,8 +20,26 @@ import java.util.*;
 public class UserService {
 
 
-    private final InMemoryUserStorage inMemoryUserStorage;
+    private final UserStorage userStorage;
 
+    public List<UserDto> getUsers() {
+        return new ArrayList<>(userStorage.getUsers().values())
+                .stream()
+                .map(UserMapper.USER_MAPPER::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public UserDto getUser(long id) {
+        return UserMapper.USER_MAPPER.toDto(userStorage.getUser(id));
+    }
+
+    public UserDto postUser(UserDto dto) {
+        return UserMapper.USER_MAPPER.toDto(userStorage.postUser(dto));
+    }
+
+    public UserDto updateUser(UserDto dto) {
+        return UserMapper.USER_MAPPER.toDto(userStorage.updateUser(dto));
+    }
 
     public ResponseEntity<String> addFriend(long userId, long friendId) {
         if (noSuchUser(userId, friendId)) {
@@ -28,7 +50,7 @@ public class UserService {
             log.info("these users are already friends");
             return new ResponseEntity<>("you are friends already", HttpStatus.ALREADY_REPORTED);
         }
-        Map<Long, User> users = inMemoryUserStorage.getUsers();
+        Map<Long, User> users = userStorage.getUsers();
         User user = users.get(userId);
         User friend = users.get(friendId);
         user.getFriends().add(friendId);
@@ -45,7 +67,7 @@ public class UserService {
             log.info("these users are not friends");
             return new ResponseEntity<>("you are not friends yet", HttpStatus.OK);
         }
-        Map<Long, User> users = inMemoryUserStorage.getUsers();
+        Map<Long, User> users = userStorage.getUsers();
         User user = users.get(userId);
         User friend = users.get(friendId);
         user.getFriends().remove(friendId);
@@ -53,13 +75,13 @@ public class UserService {
         return new ResponseEntity<>("friend deleted", HttpStatus.OK);
     }
 
-    public List<User> getMutualFriends(long userId, long friendId) {
+    public List<UserDto> getMutualFriends(long userId, long friendId) {
         if (noSuchUser(userId, friendId)) {
             log.warn("there is no such user within users");
             throw new NoSuchEntityException();
         }
-        Set<Long> userFriends = inMemoryUserStorage.getUsers().get(userId).getFriends();
-        Set<Long> secondUserFriends = inMemoryUserStorage.getUsers().get(friendId).getFriends();
+        Set<Long> userFriends = userStorage.getUsers().get(userId).getFriends();
+        Set<Long> secondUserFriends = userStorage.getUsers().get(friendId).getFriends();
         if (userFriends == null || secondUserFriends == null) {
             return new ArrayList<>();
         }
@@ -70,30 +92,30 @@ public class UserService {
             return new ArrayList<>();
         } else {
             List<User> mutualFriends = new ArrayList<>();
-            common.forEach(f -> mutualFriends.add(inMemoryUserStorage.getUsers().get(f)));
-            return mutualFriends;
+            common.forEach(f -> mutualFriends.add(userStorage.getUsers().get(f)));
+            return mutualFriends.stream().map(UserMapper.USER_MAPPER::toDto).collect(Collectors.toList());
         }
     }
 
-    public List<User> getFriends(long id) {
+    public List<UserDto> getFriends(long id) {
         if (noSuchUser(id)) {
             log.warn("there is no such user within users");
             throw new NoSuchEntityException();
         }
         List<User> friends = new ArrayList<>();
-        inMemoryUserStorage.getUser(id).getFriends().forEach(i -> friends.add(inMemoryUserStorage.getUsers().get(i)));
-        return friends;
+        userStorage.getUser(id).getFriends().forEach(i -> friends.add(userStorage.getUsers().get(i)));
+        return friends.stream().map(UserMapper.USER_MAPPER::toDto).collect(Collectors.toList());
     }
 
 
-    private boolean noSuchUser(Long... id) {      // не понимаю улучшил ли я код или ухудшил этими проверками :)
-        Map<Long, User> users = inMemoryUserStorage.getUsers();
+    private boolean noSuchUser(Long... id) {
+        Map<Long, User> users = userStorage.getUsers();
         return (users == null) || Arrays.stream(id).anyMatch(i -> (!users.containsKey(i)));
     }
 
-    private boolean alreadyFriends(long userId, long friendId) {  // вроде стало читабельнее, когда вынес всё сюда,
-        Map<Long, User> users = inMemoryUserStorage.getUsers();
-        User user = users.get(userId);                            // но не понимаю насколько это всё было рационально
+    private boolean alreadyFriends(long userId, long friendId) {
+        Map<Long, User> users = userStorage.getUsers();
+        User user = users.get(userId);
         User friend = users.get(friendId);
         return (user != null && user.getFriends() != null && user.getFriends().contains(friendId))
                 || (friend != null && friend.getFriends() != null && friend.getFriends().contains(userId));

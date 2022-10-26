@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate.fabrics;
+package ru.yandex.practicum.filmorate.factories;
 
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 
-public class FilmFabric {
+public class FilmFactory {
 
     private static int id = 0;
 

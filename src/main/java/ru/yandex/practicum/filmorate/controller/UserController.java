@@ -4,44 +4,34 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.UserDto;
-import ru.yandex.practicum.filmorate.mapper.UserMapper;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
-
-
-    private final InMemoryUserStorage inMemoryUserStorage;
     private final UserService userService;
 
     @GetMapping
-    public List<UserDto> getUsers() {
-        List<User> users = new ArrayList<>(inMemoryUserStorage.getUsers().values());
-        return users.stream().map(UserMapper.USER_MAPPER::toDto).collect(Collectors.toList());
+    public ResponseEntity<List<UserDto>> getUsers() {
+        return ResponseEntity.ok(userService.getUsers());
     }
 
     @GetMapping("/{id}")
-    public UserDto getUser(@PathVariable long id) {
-        return UserMapper.USER_MAPPER.toDto(inMemoryUserStorage.getUser(id));
+    public ResponseEntity<UserDto> getUser(@PathVariable long id) {
+        return ResponseEntity.ok(userService.getUser(id));
     }
 
     @PostMapping
-    public UserDto createUser(@RequestBody @Valid UserDto dto) {
-        return UserMapper.USER_MAPPER.toDto(inMemoryUserStorage.postUser(dto));
+    public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserDto dto) {
+        return ResponseEntity.ok(userService.postUser(dto));
     }
 
     @PutMapping
-    public UserDto update(@RequestBody @Valid UserDto dto) {
-        return UserMapper.USER_MAPPER.toDto(inMemoryUserStorage.updateUser(dto));
+    public ResponseEntity<UserDto> update(@RequestBody @Valid UserDto dto) {
+        return ResponseEntity.ok(userService.updateUser(dto));
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -55,15 +45,13 @@ public class UserController {
     }
 
     @GetMapping("{id}/friends")
-    public List<UserDto> getFriends(@PathVariable long id) {
-        List<User> users = userService.getFriends(id);
-        return users.stream().map(UserMapper.USER_MAPPER::toDto).collect(Collectors.toList());
+    public ResponseEntity<List<UserDto>> getFriends(@PathVariable long id) {
+        return ResponseEntity.ok(userService.getFriends(id));
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<UserDto> getMutualFriends(@PathVariable long id, @PathVariable long otherId) {
-        List<User> mutualFriends = userService.getMutualFriends(id, otherId);
-        return mutualFriends.stream().map(UserMapper.USER_MAPPER::toDto).collect(Collectors.toList());
+    public ResponseEntity<List<UserDto>> getMutualFriends(@PathVariable long id, @PathVariable long otherId) {
+        return ResponseEntity.ok(userService.getMutualFriends(id, otherId));
     }
 }
 

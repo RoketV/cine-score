@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dto;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -9,10 +10,8 @@ import java.time.LocalDate;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
 public class UserDto {
-
-    public UserDto() {
-    }
 
     public UserDto(String email, String login, String name, LocalDate birthday) {
         this.email = email;
@@ -20,6 +19,7 @@ public class UserDto {
         this.name = name;
         this.birthday = birthday;
     }
+
 
     private long id;
     @NotBlank

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exceptions.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.fabrics.FilmFabric;
+import ru.yandex.practicum.filmorate.factories.FilmFactory;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -26,7 +26,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.warn("trying to make null film");
             throw new ValidationException("entity cannot be null");
         }
-        Film film = FilmFabric.createFilm(dto);
+        Film film = FilmFactory.createFilm(dto);
         films.put(film.getId(), film);
         log.info("film posted");
         return film;
