@@ -12,17 +12,11 @@ import java.time.LocalDate;
 @Data
 public class Film {
 
-    public Film() {
-        idCounter++;
-        id = idCounter;
-    }
-
-
-    private static long idCounter = 0;
     @Id
     private long id;
     private String name;
     private String description;
     private LocalDate releaseDate;
     private int duration;
+    private long rate;
 }
