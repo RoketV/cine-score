@@ -15,13 +15,13 @@ public class FilmMapperTests {
     @DisplayName("checks if mapper converts Film to FilmDto")
     void FilmToDtoMapperTest() {
         Film film = new Film();
-        film.setName("name");
+        film.setTitle("name");
         film.setDescription("description");
         film.setDuration(120);
         film.setReleaseDate(LocalDate.of(1996, 1,28));
         FilmDto dto = FilmMapper.FILM_MAPPER.toDto(film);
         Assertions.assertAll(
-                () -> Assertions.assertEquals(dto.getName(), film.getName()),
+                () -> Assertions.assertEquals(dto.getName(), film.getTitle()),
                 () -> Assertions.assertEquals(dto.getDescription(), film.getDescription()),
                 () -> Assertions.assertEquals(dto.getDuration(), film.getDuration()),
                 () -> Assertions.assertEquals(dto.getReleaseDate(), film.getReleaseDate())
@@ -38,7 +38,7 @@ public class FilmMapperTests {
         dto.setReleaseDate(LocalDate.of(1996, 1,28));
         Film film = FilmMapper.FILM_MAPPER.toFilm(dto);
         Assertions.assertAll(
-                () -> Assertions.assertEquals(film.getName(), film.getName()),
+                () -> Assertions.assertEquals(film.getTitle(), film.getTitle()),
                 () -> Assertions.assertEquals(film.getDescription(), film.getDescription()),
                 () -> Assertions.assertEquals(film.getDuration(), film.getDuration()),
                 () -> Assertions.assertEquals(film.getReleaseDate(), film.getReleaseDate())

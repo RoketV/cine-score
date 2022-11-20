@@ -17,7 +17,7 @@ public class User {
 
     public User() {
         friends = new HashSet<>();
-        likedFilms = new HashSet<>();           // правильно ли это инициализировать через конструктор?
+        likedFilms = new HashSet<>();
     }
 
     @Id

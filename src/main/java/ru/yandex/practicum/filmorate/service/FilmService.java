@@ -12,7 +12,7 @@ import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.inMemory.InMemoryUserStorage;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -65,7 +65,7 @@ public class FilmService {
         User user = inMemoryUserStorage.getUsers().get(userId);
         Film film = filmStorage.getFilm(filmId);
         if (user.getLikedFilms().contains(filmId)) {
-            return new ResponseEntity<>(String.format("user %s liked %s film before", user.getName(), film.getName())
+            return new ResponseEntity<>(String.format("user %s liked %s film before", user.getName(), film.getTitle())
                     , HttpStatus.ALREADY_REPORTED);
         }
         film.setRate(film.getRate() + 1);
@@ -81,7 +81,7 @@ public class FilmService {
         User user = inMemoryUserStorage.getUsers().get(userId);
         Film film = filmStorage.getFilm(filmId);
         if (!user.getLikedFilms().contains(filmId)) {
-            return new ResponseEntity<>(String.format("user %s never liked %s film before", user.getName(), film.getName())
+            return new ResponseEntity<>(String.format("user %s never liked %s film before", user.getName(), film.getTitle())
                     , HttpStatus.NOT_FOUND);
         }
         film.setRate(film.getRate() - 1);

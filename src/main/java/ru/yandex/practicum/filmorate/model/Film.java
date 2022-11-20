@@ -14,9 +14,10 @@ public class Film {
 
     @Id
     private long id;
-    private String name;
+    private String title;
     private String description;
     private LocalDate releaseDate;
+    private String genre;
     private int duration;
     private long rate;
 }

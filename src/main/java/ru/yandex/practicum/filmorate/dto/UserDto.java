@@ -20,7 +20,6 @@ public class UserDto {
         this.birthday = birthday;
     }
 
-
     private long id;
     @NotBlank
     @Email(message = "email has its structure")
