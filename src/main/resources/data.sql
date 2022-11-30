@@ -1,3 +1,40 @@
+DELETE
+FROM mpa_film;
+
+DELETE
+FROM films_genres;
+DELETE
+FROM liked_films;
+
+DELETE
+FROM mpa;
+ALTER TABLE mpa
+    ALTER COLUMN mpa_id RESTART WITH 1;
+
+
+DELETE
+FROM statuses;
+ALTER TABLE statuses
+    ALTER COLUMN status_id RESTART WITH 1;
+
+DELETE
+FROM genres;
+ALTER TABLE genres
+    ALTER COLUMN genre_id RESTART WITH 1;
+
+DELETE
+FROM films;
+ALTER TABLE films
+    ALTER COLUMN film_id RESTART WITH 1;
+
+DELETE
+FROM friendship_relationships;
+
+DELETE
+FROM users;
+ALTER TABLE users
+    ALTER COLUMN user_id RESTART WITH 1;
+
 INSERT INTO GENRES (GENRE_NAME) VALUES ('Комедия');
 INSERT INTO GENRES (GENRE_NAME) VALUES ('Драма');
 INSERT INTO GENRES (GENRE_NAME) VALUES ('Мультфильм');
