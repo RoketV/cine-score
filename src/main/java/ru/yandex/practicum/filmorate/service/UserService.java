@@ -2,17 +2,14 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.UserDto;
-
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
-
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,7 +18,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
 
-    @Qualifier("inMemoryUser")
+
     private final UserStorage userStorage;
 
     public List<UserDto> getUsers() {

@@ -6,4 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "empty entity")
 public class NoSuchEntityException extends RuntimeException {
+    public NoSuchEntityException(String message) {
+        super(message);
+    }
 }

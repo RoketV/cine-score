@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.inMemory;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
@@ -10,13 +11,13 @@ import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class InMemoryFilmStorage implements FilmStorage {
-    private final Map<Long, Film> films = new HashMap<>();
+    private final Map<Long, Film> films;
 
     public Map<Long, Film> getFilms() {
         return films;
@@ -44,7 +45,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.info("film updated");
         } else {
             log.warn("cannot update non-existing entity");
-            throw new NoSuchEntityException();
+            throw new NoSuchEntityException("cannot update non-existing entity");
         }
         return film;
     }
@@ -52,16 +53,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film getFilm(long id) {
         if (!films.containsKey(id)) {
             log.info("trying to get non existing film");
-            throw new NoSuchEntityException();
+            throw new NoSuchEntityException("trying to get non existing film");
         }
         return films.get(id);
     }
-
-    public Film deleteFilm(FilmDto dto) {
-        Film film = FilmMapper.FILM_MAPPER.toFilm(dto);
-        films.remove(film.getId());
-        return film;
-    }
-
-
 }

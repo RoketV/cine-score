@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.factories.UserFactory;
 import ru.yandex.practicum.filmorate.exceptions.NoSuchEntityException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.validator.UserValidation;
 
 import java.util.*;
 
@@ -23,16 +23,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User postUser(UserDto dto) {
-        if (dto == null) {
-            log.debug("problems while creating a user");
-            throw new ValidationException("fail to create user");
-        }
-        if (dto.getName() == null || dto.getName().isBlank()) {
-            dto.setName(dto.getLogin());
-        }
-        if (dto.getLogin() == null || dto.getLogin().isBlank()) {
-            dto.setLogin(dto.getName());
-        }
+        UserValidation.isValid(dto);
         User user = UserFactory.createUser(dto);
         users.put(user.getId(), user);
         log.info("film posted");
@@ -40,22 +31,19 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     public User updateUser(UserDto dto) {
-        if (dto == null) {
-            log.warn("trying to make null entity");
-            throw new ValidationException("entity cannot be null");
+        if(!UserValidation.doesExist(dto.getId())) {
+            throw new NoSuchEntityException("there is no user with this id");
         }
-        if (users.containsKey(dto.getId())) {
             User user = UserMapper.USER_MAPPER.toUser(dto);
             users.put(dto.getId(), user);
             log.info("user updated");
             return user;
-        } else {
-            log.warn("cannot update non-existing entity");
-            throw new NoSuchEntityException();
-        }
     }
 
     public User deleteUser(UserDto dto) {
+        if(!UserValidation.doesExist(dto.getId())) {
+            throw new NoSuchEntityException("there is no user with this id");
+        }
         users.remove(dto.getId());
         return UserMapper.USER_MAPPER.toUser(dto);
     }
@@ -65,9 +53,8 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     public User getUser(long id) {
-        if (!users.containsKey(id)) {
-            log.info("no user with this id");
-            throw new NoSuchEntityException();
+        if(!UserValidation.doesExist(id)) {
+            throw new NoSuchEntityException("there is no user with this id");
         }
         return users.get(id);
     }
@@ -107,7 +94,7 @@ public class InMemoryUserStorage implements UserStorage {
     public List<User> getMutualFriends(long userId, long friendId) {
         if (noSuchUser(userId, friendId)) {
             log.warn("there is no such user within users");
-            throw new NoSuchEntityException();
+            throw new NoSuchEntityException("there is no user with this id");
         }
         Set<Long> userFriends = users.get(userId).getFriends();
         Set<Long> secondUserFriends = users.get(friendId).getFriends();
@@ -140,7 +127,7 @@ public class InMemoryUserStorage implements UserStorage {
     public List<User> getFriends(long id) {
         if (noSuchUser(id)) {
             log.warn("there is no such user within users");
-            throw new NoSuchEntityException();
+            throw new NoSuchEntityException("there is no user with this id");
         }
         List<User> friends = new ArrayList<>();
         users.get(id).getFriends().forEach(i -> friends.add(users.get(i)));
