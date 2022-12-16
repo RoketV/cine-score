@@ -7,8 +7,6 @@ import javax.persistence.Id;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 
-
-//@Entity
 @Data
 public class Film {
 

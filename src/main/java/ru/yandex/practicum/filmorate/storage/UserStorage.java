@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import org.springframework.http.ResponseEntity;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -19,9 +18,9 @@ public interface UserStorage {
 
     User getUser(long id);
 
-    ResponseEntity<String> deleteFriend(long userId, long friendId);
+    void deleteFriend(long userId, long friendId);
 
-    ResponseEntity<String> addFriend(long userId, long friendId);
+    void addFriend(long userId, long friendId);
 
     List<User> getMutualFriends(long userId, long friendId);
 

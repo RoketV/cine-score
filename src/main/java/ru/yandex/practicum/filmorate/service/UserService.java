@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
@@ -40,14 +39,12 @@ public class UserService {
         return UserMapper.USER_MAPPER.toDto(userStorage.updateUser(dto));
     }
 
-    public ResponseEntity<String> addFriend(long userId, long friendId) {
-
-        return userStorage.addFriend(userId, friendId);
+    public void addFriend(long userId, long friendId) {
+        userStorage.addFriend(userId, friendId);
     }
 
-    public ResponseEntity<String> deleteFriend(long userId, long friendId) {
-
-        return userStorage.deleteFriend(userId, friendId);
+    public void deleteFriend(long userId, long friendId) {
+        userStorage.deleteFriend(userId, friendId);
     }
 
     public List<UserDto> getMutualFriends(long userId, long friendId) {

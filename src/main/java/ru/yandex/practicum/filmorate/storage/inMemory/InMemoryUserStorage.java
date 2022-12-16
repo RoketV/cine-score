@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.inMemory;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.UserDto;
-import ru.yandex.practicum.filmorate.factories.UserFactory;
 import ru.yandex.practicum.filmorate.exceptions.NoSuchEntityException;
+import ru.yandex.practicum.filmorate.factories.UserFactory;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -59,36 +57,30 @@ public class InMemoryUserStorage implements UserStorage {
         return users.get(id);
     }
 
-    public ResponseEntity<String> deleteFriend(long userId, long friendId) {
+    public void deleteFriend(long userId, long friendId) {
         if (noSuchUser(userId, friendId)) {
             log.warn("there is no such user within users");
-            return new ResponseEntity<>("there is no such user", HttpStatus.NOT_FOUND);
         }
         if (!alreadyFriends(userId, friendId)) {
             log.info("these users are not friends");
-            return new ResponseEntity<>("you are not friends yet", HttpStatus.OK);
         }
         User user = users.get(userId);
         User friend = users.get(friendId);
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
-        return new ResponseEntity<>("friend deleted", HttpStatus.OK);
     }
 
-    public ResponseEntity<String> addFriend(long userId, long friendId) {
+    public void addFriend(long userId, long friendId) {
         if (noSuchUser(userId, friendId)) {
             log.warn("there is no such user within users");
-            return new ResponseEntity<>("there is no such user", HttpStatus.NOT_FOUND);
         }
         if (alreadyFriends(userId, friendId)) {
             log.info("these users are already friends");
-            return new ResponseEntity<>("you are friends already", HttpStatus.ALREADY_REPORTED);
         }
         User user = users.get(userId);
         User friend = users.get(friendId);
         user.getFriends().add(friendId);
         friend.getFriends().add(userId);
-        return new ResponseEntity<>("friend added", HttpStatus.OK);
     }
 
     public List<User> getMutualFriends(long userId, long friendId) {

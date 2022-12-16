@@ -3,8 +3,6 @@ package ru.yandex.practicum.filmorate.storage.inDb;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -100,15 +98,14 @@ public class UserDbStorageDao implements UserStorage {
     }
 
     @Override
-    public ResponseEntity<String> deleteFriend(long userId, long friendId) {
+    public void deleteFriend(long userId, long friendId) {
         UserValidation.doesExist(userId, friendId);
         String sql = "DELETE FROM FRIENDSHIP_RELATIONSHIPS WHERE USER_ID=? AND FRIEND_ID=?";
         jdbcTemplate.update(sql, userId, friendId);
-        return new ResponseEntity<>("friend added", HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<String> addFriend(long userId, long friendId) {
+    public void addFriend(long userId, long friendId) {
         List<Long> ids = getUsers().values().stream()
                 .map(User::getId)
                 .collect(Collectors.toList());
@@ -117,7 +114,7 @@ public class UserDbStorageDao implements UserStorage {
         }
         String sql = "INSERT INTO FRIENDSHIP_RELATIONSHIPS(user_id, friend_id) VALUES ( ?, ? )";
         jdbcTemplate.update(sql, userId, friendId);
-        return new ResponseEntity<>("friend added", HttpStatus.OK);
+        log.info("friend added");
     }
 
     @Override
