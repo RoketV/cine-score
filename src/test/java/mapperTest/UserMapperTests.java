@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.validator.mapperTest;
+package mapperTest;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

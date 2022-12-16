@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exceptions.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,7 +22,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Component("filmDao")
+@Repository("filmDao")
 @Primary
 @Slf4j
 public class FilmDbStorageDao implements FilmStorage {
@@ -77,7 +76,7 @@ public class FilmDbStorageDao implements FilmStorage {
 
         String sqlDeleteGenres = "DELETE FROM FILMS_GENRES WHERE FILM_ID=?";
         jdbcTemplate.update(sqlDeleteGenres, dto.getId());
-            putFilmGenresRecord(dto);
+        putFilmGenresRecord(dto);
 
         return FilmMapper.FILM_MAPPER.toFilm(dto);
     }
@@ -103,7 +102,6 @@ public class FilmDbStorageDao implements FilmStorage {
             throw new NoSuchEntityException("there is no such entity with this id");
         }
         return jdbcTemplate.queryForObject(sql, this::mapToFilm, id, id);
-
     }
 
     private void putFilmGenresRecord(FilmDto dto) {
