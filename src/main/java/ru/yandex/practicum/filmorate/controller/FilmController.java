@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.service.FilmService;
+
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -42,12 +43,12 @@ public class FilmController {
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public ResponseEntity<String> addLike(@PathVariable long filmId, @PathVariable long userId) {
-        return filmService.addLike(filmId, userId);
+    public ResponseEntity<FilmDto> addLike(@PathVariable long filmId, @PathVariable long userId) {
+        return ResponseEntity.ok(filmService.addLike(filmId, userId));
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public ResponseEntity<String> deleteLike(@PathVariable long filmId, @PathVariable long userId) {
-        return filmService.deleteLike(filmId, userId);
+    public ResponseEntity<FilmDto> deleteLike(@PathVariable long filmId, @PathVariable long userId) {
+        return ResponseEntity.ok(filmService.deleteLike(filmId, userId));
     }
 }

@@ -43,4 +43,4 @@ build/
 .vscode/
 
 *.db
-db/*
+src/main/java/ru/yandex/practicum/filmorate/db/*

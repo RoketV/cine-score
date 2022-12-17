@@ -4,13 +4,14 @@ import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Map;
+import java.util.Optional;
 
 public interface FilmStorage {
+    Optional<Film> postFilm(FilmDto dto);
 
+    Optional<Film> updateFilm(FilmDto dto);
 
-    Film postFilm(FilmDto dto);
-    Film updateFilm(FilmDto dto);
-    Film deleteFilm(FilmDto dto);
-    Map<Long, Film> getFilms();
-    Film getFilm(long id);
+    Optional<Map<Long, Film>> getFilms();
+
+    Optional<Film> getFilm(long id);
 }
