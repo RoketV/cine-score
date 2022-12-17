@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.inMemory;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exceptions.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.factories.UserFactory;
@@ -12,7 +12,7 @@ import ru.yandex.practicum.filmorate.validator.UserValidation;
 
 import java.util.*;
 
-@Component("inMemoryUser")
+@Repository("inMemoryUser")
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
 
@@ -20,44 +20,44 @@ public class InMemoryUserStorage implements UserStorage {
 
 
     @Override
-    public User postUser(UserDto dto) {
+    public Optional<User> postUser(UserDto dto) {
         UserValidation.isValid(dto);
         User user = UserFactory.createUser(dto);
         users.put(user.getId(), user);
         log.info("film posted");
-        return user;
+        return Optional.of(user);
     }
 
-    public User updateUser(UserDto dto) {
+    public Optional<User> updateUser(UserDto dto) {
         if(!UserValidation.doesExist(dto.getId())) {
             throw new NoSuchEntityException("there is no user with this id");
         }
             User user = UserMapper.USER_MAPPER.toUser(dto);
             users.put(dto.getId(), user);
             log.info("user updated");
-            return user;
+            return Optional.of(user);
     }
 
-    public User deleteUser(UserDto dto) {
+    public Optional<User> deleteUser(UserDto dto) {
         if(!UserValidation.doesExist(dto.getId())) {
             throw new NoSuchEntityException("there is no user with this id");
         }
         users.remove(dto.getId());
-        return UserMapper.USER_MAPPER.toUser(dto);
+        return Optional.of(UserMapper.USER_MAPPER.toUser(dto));
     }
 
-    public Map<Long, User> getUsers() {
-        return users;
+    public Optional<Map<Long, User>> getUsers() {
+        return Optional.of(users);
     }
 
-    public User getUser(long id) {
+    public Optional<User> getUser(long id) {
         if(!UserValidation.doesExist(id)) {
             throw new NoSuchEntityException("there is no user with this id");
         }
-        return users.get(id);
+        return Optional.of(users.get(id));
     }
 
-    public void deleteFriend(long userId, long friendId) {
+    public Optional<User> deleteFriend(long userId, long friendId) {
         if (noSuchUser(userId, friendId)) {
             log.warn("there is no such user within users");
         }
@@ -68,9 +68,10 @@ public class InMemoryUserStorage implements UserStorage {
         User friend = users.get(friendId);
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
+        return Optional.of(user);
     }
 
-    public void addFriend(long userId, long friendId) {
+    public Optional<User> addFriend(long userId, long friendId) {
         if (noSuchUser(userId, friendId)) {
             log.warn("there is no such user within users");
         }
@@ -81,9 +82,10 @@ public class InMemoryUserStorage implements UserStorage {
         User friend = users.get(friendId);
         user.getFriends().add(friendId);
         friend.getFriends().add(userId);
+        return Optional.of(user);
     }
 
-    public List<User> getMutualFriends(long userId, long friendId) {
+    public Optional<List<User>> getMutualFriends(long userId, long friendId) {
         if (noSuchUser(userId, friendId)) {
             log.warn("there is no such user within users");
             throw new NoSuchEntityException("there is no user with this id");
@@ -91,17 +93,17 @@ public class InMemoryUserStorage implements UserStorage {
         Set<Long> userFriends = users.get(userId).getFriends();
         Set<Long> secondUserFriends = users.get(friendId).getFriends();
         if (userFriends == null || secondUserFriends == null) {
-            return new ArrayList<>();
+            return Optional.of(new ArrayList<>());
         }
         Set<Long> common = new HashSet<>(userFriends);
         common.retainAll(secondUserFriends);
         if (common.isEmpty()) {
             log.info("users don's have mutual friends");
-            return new ArrayList<>();
+            return Optional.of(new ArrayList<>());
         } else {
             List<User> mutualFriends = new ArrayList<>();
             common.forEach(f -> mutualFriends.add(users.get(f)));
-            return mutualFriends;
+            return Optional.of(mutualFriends);
         }
     }
 
@@ -116,13 +118,13 @@ public class InMemoryUserStorage implements UserStorage {
                 || (friend != null && friend.getFriends() != null && friend.getFriends().contains(userId));
     }
 
-    public List<User> getFriends(long id) {
+    public Optional<List<User>> getFriends(long id) {
         if (noSuchUser(id)) {
             log.warn("there is no such user within users");
             throw new NoSuchEntityException("there is no user with this id");
         }
         List<User> friends = new ArrayList<>();
         users.get(id).getFriends().forEach(i -> friends.add(users.get(i)));
-        return friends;
+        return Optional.of(friends);
     }
 }

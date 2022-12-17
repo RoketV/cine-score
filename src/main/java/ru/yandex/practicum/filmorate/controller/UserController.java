@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.service.UserService;
+
 import javax.validation.Valid;
 import java.util.List;
 
@@ -37,15 +38,13 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<String> addFriend(@PathVariable long id, @PathVariable long friendId) {
-        userService.addFriend(id, friendId);
-        return ResponseEntity.ok("friend added");
+    public ResponseEntity<UserDto> addFriend(@PathVariable long id, @PathVariable long friendId) {
+        return ResponseEntity.ok(userService.addFriend(id, friendId));
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<String> deleteFriend(@PathVariable long id, @PathVariable long friendId) {
-        userService.deleteFriend(id, friendId);
-        return ResponseEntity.ok("Friend deleted");
+    public ResponseEntity<UserDto> deleteFriend(@PathVariable long id, @PathVariable long friendId) {
+        return ResponseEntity.ok(userService.deleteFriend(id, friendId));
     }
 
     @GetMapping("{id}/friends")

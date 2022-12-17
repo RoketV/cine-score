@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 @Primary
 @Slf4j
 public class FilmDbStorageDao implements FilmStorage {
-
     private final JdbcTemplate jdbcTemplate;
 
     public FilmDbStorageDao(JdbcTemplate jdbcTemplate) {
@@ -34,7 +33,7 @@ public class FilmDbStorageDao implements FilmStorage {
     }
 
     @Override
-    public Film postFilm(FilmDto dto) {
+    public Optional<Film> postFilm(FilmDto dto) {
         String sql = "INSERT INTO FILMS(title, description, release_date, duration, rate)" +
                 " VALUES(?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -52,18 +51,18 @@ public class FilmDbStorageDao implements FilmStorage {
         setFilmDtoMpa(dto);
         putFilmGenresRecord(dto);
         setFilmGenres(dto);
-        return FilmMapper.FILM_MAPPER.toFilm(dto);
+        return Optional.of(FilmMapper.FILM_MAPPER.toFilm(dto));
     }
 
     @Override
-    public Film updateFilm(FilmDto dto) {
-        if (!getFilms().containsKey(dto.getId())) {
+    public Optional<Film> updateFilm(FilmDto dto) {
+        if (!getFilms().get().containsKey(dto.getId()) && getFilms().isPresent()) {
             throw new NoSuchEntityException("trying to update non existing film");
         }
         String sql = "UPDATE FILMS " +
                 "SET TITLE=?, DESCRIPTION=?, RELEASE_DATE=?, DURATION=?, RATE=?" +
                 "WHERE FILM_ID=?";
-        Optional.ofNullable(dto)
+        Optional.of(dto)
                 .ifPresent(f -> jdbcTemplate.update(sql, f.getName(), f.getDescription(),
                         f.getReleaseDate(), f.getDuration(), f.getRate(), f.getId()));
 
@@ -73,35 +72,34 @@ public class FilmDbStorageDao implements FilmStorage {
         Optional.ofNullable(dto.getMpa())
                 .ifPresent(mpa -> jdbcTemplate.update(sqlMpa, mpa.getId(), dto.getId()));
 
-
         String sqlDeleteGenres = "DELETE FROM FILMS_GENRES WHERE FILM_ID=?";
         jdbcTemplate.update(sqlDeleteGenres, dto.getId());
         putFilmGenresRecord(dto);
 
-        return FilmMapper.FILM_MAPPER.toFilm(dto);
+        return Optional.of(FilmMapper.FILM_MAPPER.toFilm(dto));
     }
 
     @Override
-    public Map<Long, Film> getFilms() {
+    public Optional<Map<Long, Film>> getFilms() {
         String sql = "SELECT F.*, M.* " +
                 "FROM FILMS AS F " +
                 "         INNER JOIN MPA AS M ON M.MPA_ID IN " +
                 "    (SELECT MPA_ID FROM MPA_FILM WHERE MPA_FILM.FILM_ID = F.FILM_ID)";
         List<Film> films = jdbcTemplate.query(sql, this::mapToFilm);
         films.forEach(this::setFilmGenres);
-        return films.stream().collect(Collectors.toMap(Film::getId, Function.identity()));
+        return Optional.of(films.stream().collect(Collectors.toMap(Film::getId, Function.identity())));
     }
 
     @Override
-    public Film getFilm(long id) {
+    public Optional<Film> getFilm(long id) {
         String sql = "SELECT F.*, M.* " +
                 "FROM FILMS AS F " +
                 "         INNER JOIN MPA AS M ON M.MPA_ID IN " +
                 "    (SELECT MPA_ID FROM MPA_FILM WHERE MPA_FILM.FILM_ID = ?) WHERE FILM_ID=?";
-        if (!getFilms().containsKey(id)) {
+        if (!getFilms().get().containsKey(id) && getFilms().isPresent()) {
             throw new NoSuchEntityException("there is no such entity with this id");
         }
-        return jdbcTemplate.queryForObject(sql, this::mapToFilm, id, id);
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, this::mapToFilm, id, id));
     }
 
     private void putFilmGenresRecord(FilmDto dto) {

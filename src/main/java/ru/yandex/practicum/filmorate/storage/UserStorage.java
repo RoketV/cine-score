@@ -5,24 +5,25 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface UserStorage {
 
-    User postUser(UserDto dto);
+    Optional<User> postUser(UserDto dto);
 
-    User deleteUser(UserDto dto);
+    Optional<User> deleteUser(UserDto dto);
 
-    User updateUser(UserDto dto);
+    Optional<User> updateUser(UserDto dto);
 
-    Map<Long, User> getUsers();
+    Optional<Map<Long, User>> getUsers();
 
-    User getUser(long id);
+    Optional<User> getUser(long id);
 
-    void deleteFriend(long userId, long friendId);
+    Optional<User> deleteFriend(long userId, long friendId);
 
-    void addFriend(long userId, long friendId);
+    Optional<User> addFriend(long userId, long friendId);
 
-    List<User> getMutualFriends(long userId, long friendId);
+    Optional<List<User>> getMutualFriends(long userId, long friendId);
 
-    List<User> getFriends(long id);
+    Optional<List<User>> getFriends(long id);
 }

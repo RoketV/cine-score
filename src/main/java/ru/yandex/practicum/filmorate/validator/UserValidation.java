@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 
+import ru.yandex.practicum.filmorate.exceptions.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -20,7 +21,7 @@ public class UserValidation {
 
     @Autowired
     public UserValidation(UserStorage userStorage) {
-        this.userStorage = userStorage;
+        UserValidation.userStorage = userStorage;
     }
 
     public static void isValid(UserDto dto) {
@@ -37,7 +38,9 @@ public class UserValidation {
     }
 
     public static boolean doesExist(long... id) {
-        List<Long> ids = userStorage.getUsers().values().stream()
+        Map<Long, User> users = userStorage.getUsers()
+                .orElseThrow(() -> new NoSuchEntityException("there are no users in data base"));
+        List<Long> ids = users.values().stream()
                 .map(User::getId)
                 .collect(Collectors.toList());
         for (long l : id) {

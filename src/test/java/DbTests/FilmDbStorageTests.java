@@ -33,7 +33,7 @@ public class FilmDbStorageTests {
     public void config() {
         dto = (new FilmDto("name", " description",
                 LocalDate.of(1996, 1, 28), 120));
-        mpa = mpaStorage.getMpa(1);
+        mpa = mpaStorage.getMpa(1).get();
         dto.setMpa(mpa);
 
     }
@@ -43,7 +43,7 @@ public class FilmDbStorageTests {
     @DisplayName("tests post and get methods")
     public void testPostAndGetFilmMethod() {
         filmStorage.postFilm(dto);
-        Film film = filmStorage.getFilm(1);
+        Film film = filmStorage.getFilm(1).get();
         Assertions.assertAll(
                 () -> Assertions.assertEquals(film.getId(), 1),
                 () -> Assertions.assertEquals(film.getName(), "name")
@@ -64,11 +64,11 @@ public class FilmDbStorageTests {
         filmStorage.postFilm(dto);
         FilmDto newDto = new FilmDto("newName", " description",
                 LocalDate.of(1996, 1, 28), 120);
-        Mpa newMpa = mpaStorage.getMpa(2);
+        Mpa newMpa = mpaStorage.getMpa(2).get();
         newDto.setId(1);
         newDto.setMpa(newMpa);
         filmStorage.updateFilm(newDto);
-        Film film = filmStorage.getFilm(1);
+        Film film = filmStorage.getFilm(1).get();
         Assertions.assertAll(
                 () -> Assertions.assertEquals(film.getId(), 1),
                 () -> Assertions.assertEquals(film.getName(), "newName"),
@@ -82,7 +82,7 @@ public class FilmDbStorageTests {
     public void updateNonExistingFilmTest() {
         FilmDto newDto = new FilmDto("newName", " description",
                 LocalDate.of(1996, 1, 28), 120);
-        Mpa newMpa = mpaStorage.getMpa(2);
+        Mpa newMpa = mpaStorage.getMpa(2).get();
         newDto.setId(1);
         newDto.setMpa(newMpa);
         Assertions.assertThrows(NoSuchEntityException.class, () -> filmStorage.updateFilm(newDto));

@@ -26,19 +26,17 @@ public class UserDbStorageTests {
 
     private final UserStorage userStorage;
 
-
     @BeforeEach
     public void config() {
         userStorage.postUser(new UserDto("email", "login", "name",
                 LocalDate.of(1996, 1, 28)));
     }
 
-
     @Test
     @Sql("classpath:data.sql")
     @DisplayName("tests getUser method")
     public void testFindUserById() {
-        User user = userStorage.getUser(1);
+        User user = userStorage.getUser(1).get();
         Assertions.assertAll(
                 () -> Assertions.assertEquals(user.getId(), 1),
                 () -> Assertions.assertEquals(user.getName(), "name")
@@ -50,7 +48,7 @@ public class UserDbStorageTests {
     @DisplayName("tests postUser method")
     public void testPostUser() {
         User newUser = userStorage.postUser(new UserDto("emailTest", "loginTest", "nameTest",
-                LocalDate.of(1996, 2, 28)));
+                LocalDate.of(1996, 2, 28))).get();
         Assertions.assertAll(
                 () -> Assertions.assertEquals(2, newUser.getId()),
                 () -> Assertions.assertEquals("nameTest", newUser.getName())
@@ -65,7 +63,7 @@ public class UserDbStorageTests {
                 LocalDate.of(1996, 1, 28));
         newUser.setId(1);
         userStorage.updateUser(newUser);
-        User user = userStorage.getUser(1);
+        User user = userStorage.getUser(1).get();
         Assertions.assertAll(
                 () -> assertEquals(newUser.getEmail(), user.getEmail()),
                 () -> assertEquals(newUser.getLogin(), user.getLogin()),
@@ -80,7 +78,7 @@ public class UserDbStorageTests {
     public void testGetUser() {
         userStorage.postUser(new UserDto("emailTest", "loginTest", "nameTest",
                 LocalDate.of(1996, 2, 28)));
-        Collection<User> users = userStorage.getUsers().values();
+        Collection<User> users = userStorage.getUsers().get().values();
         Assertions.assertEquals(2, users.size());
     }
 }

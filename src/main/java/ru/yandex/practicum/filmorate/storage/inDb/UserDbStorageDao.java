@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exceptions.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
@@ -23,7 +23,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
-@Component("userDao")
+@Repository("userDao")
 @Primary
 @Slf4j
 public class UserDbStorageDao implements UserStorage {
@@ -35,7 +35,7 @@ public class UserDbStorageDao implements UserStorage {
     }
 
     @Override
-    public User postUser(UserDto dto) {
+    public Optional<User> postUser(UserDto dto) {
         UserValidation.isValid(dto);
         String sql = "INSERT INTO users(email, login, name, birthday)" +
                 " VALUES(?,?,?,?)";
@@ -51,46 +51,46 @@ public class UserDbStorageDao implements UserStorage {
         dto.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         putLikedFilmsRecord(dto);
 
-        return UserMapper.USER_MAPPER.toUser(dto);
+        return Optional.of(UserMapper.USER_MAPPER.toUser(dto));
     }
 
     @Override
-    public User deleteUser(UserDto dto) {
+    public Optional<User> deleteUser(UserDto dto) {
         if (!UserValidation.doesExist(dto.getId())) {
             throw new NoSuchEntityException("there is no user with this id");
         }
         String sql = "DELETE FROM users WHERE USER_ID=?";
         jdbcTemplate.update(sql, dto.getId());
-        return UserMapper.USER_MAPPER.toUser(dto);
+        return Optional.of(UserMapper.USER_MAPPER.toUser(dto));
     }
 
     @Override
-    public User updateUser(UserDto dto) throws NoSuchEntityException {
+    public Optional<User> updateUser(UserDto dto) throws NoSuchEntityException {
         getUser(dto.getId());
         String sql = "UPDATE users " +
                 "SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=? " +
                 "WHERE USER_ID=?";
         putLikedFilmsRecord(dto);
         jdbcTemplate.update(sql, dto.getEmail(), dto.getLogin(), dto.getName(), dto.getBirthday(), dto.getId());
-        return UserMapper.USER_MAPPER.toUser(dto);
+        return Optional.of(UserMapper.USER_MAPPER.toUser(dto));
     }
 
     @Override
-    public Map<Long, User> getUsers() {
+    public Optional<Map<Long, User>> getUsers() {
         String sql = "SELECT * FROM users";
         List<User> users = jdbcTemplate.query(sql, this::mapToUser);
         if (!users.isEmpty()) {
-            return users.stream()
-                    .collect(Collectors.toMap(User::getId, Function.identity()));
+            return Optional.of(users.stream()
+                    .collect(Collectors.toMap(User::getId, Function.identity())));
         }
         throw new NoSuchEntityException("the table with users is empty");
     }
 
     @Override
-    public User getUser(long id) {
+    public Optional<User> getUser(long id) {
         try {
             String sql = "SELECT * FROM users WHERE user_id=?";
-            return jdbcTemplate.queryForObject(sql, this::mapToUser, id);
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, this::mapToUser, id));
         } catch (EmptyResultDataAccessException e) {
             throw new NoSuchEntityException("there is no such user with this id");
         }
@@ -98,15 +98,16 @@ public class UserDbStorageDao implements UserStorage {
     }
 
     @Override
-    public void deleteFriend(long userId, long friendId) {
+    public Optional<User> deleteFriend(long userId, long friendId) {
         UserValidation.doesExist(userId, friendId);
         String sql = "DELETE FROM FRIENDSHIP_RELATIONSHIPS WHERE USER_ID=? AND FRIEND_ID=?";
         jdbcTemplate.update(sql, userId, friendId);
+        return getUser(userId);
     }
 
     @Override
-    public void addFriend(long userId, long friendId) {
-        List<Long> ids = getUsers().values().stream()
+    public Optional<User> addFriend(long userId, long friendId) {
+        List<Long> ids = getUsers().get().values().stream()
                 .map(User::getId)
                 .collect(Collectors.toList());
         if (!(ids.contains(userId) && ids.contains(friendId))) {
@@ -115,25 +116,26 @@ public class UserDbStorageDao implements UserStorage {
         String sql = "INSERT INTO FRIENDSHIP_RELATIONSHIPS(user_id, friend_id) VALUES ( ?, ? )";
         jdbcTemplate.update(sql, userId, friendId);
         log.info("friend added");
+        return getUser(userId);
     }
 
     @Override
-    public List<User> getMutualFriends(long userId, long friendId) {
+    public Optional<List<User>> getMutualFriends(long userId, long friendId) {
         String sql = "SELECT * FROM USERS AS U " +
                 "INNER JOIN (SELECT FRIEND_ID FROM FRIENDSHIP_RELATIONSHIPS " +
                 "WHERE USER_ID=?) AS FR on U.USER_ID = FR.FRIEND_ID " +
                 "INNER JOIN (SELECT FRIEND_ID FROM FRIENDSHIP_RELATIONSHIPS " +
                 "WHERE USER_ID=?) AS O ON U.USER_ID=O.FRIEND_ID";
 
-        return jdbcTemplate.query(sql, this::mapToUser, userId, friendId);
+        return Optional.of(jdbcTemplate.query(sql, this::mapToUser, userId, friendId));
     }
 
     @Override
-    public List<User> getFriends(long id) {
+    public Optional<List<User>> getFriends(long id) {
         String sql = "SELECT * FROM USERS AS U " +
                 "INNER JOIN (SELECT FRIEND_ID FROM FRIENDSHIP_RELATIONSHIPS " +
                 "WHERE USER_ID=?) AS FR on U.USER_ID = FR.FRIEND_ID";
-        return jdbcTemplate.query(sql, this::mapToUser, id);
+        return Optional.of(jdbcTemplate.query(sql, this::mapToUser, id));
     }
 
     private void putLikedFilmsRecord(UserDto dto) {
